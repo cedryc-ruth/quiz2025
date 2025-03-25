@@ -83,6 +83,24 @@ if(isset($_GET['btSend']) && $statut=='reponse') {
 <title>Quiz</title>
 </head>
 <body>
+<?php if(true) { ?>
+<form action="login.php" method="post">
+	<div>
+		<label for="login">Login:</label>
+		<input type="text" name="login" id="login">
+	</div>
+	<div>
+		<label for="pwd">Mot de passe:</label>
+		<input type="password" name="pwd" id="pwd">
+	</div>
+	<button name="btLogin">Se connecter</button>
+</form>
+<?php } else { ?>
+<form action="login.php" method="post">
+	<button name="btLogout">Se déconnecter</button>
+</form>
+<?php } ?>
+
 <h1>Quiz</h1>
 <?php if($statut!='correct') { ?>
 <p><?= $questionsReponses[$nroQuestion][0] ?></p>
