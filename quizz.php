@@ -2,24 +2,14 @@
 session_start();
 
 //Déclaraiton des variables
-$questionsReponses = [
-	[
-		"Quelle est la couleur du cheval blanc de Napoléon ?",
-		"blanc",
-	],
-	[
-		"Quelle est le nom du cours de PHP ?",
-		"wssv",
-	],
-	[
-		"Quelle est le nom de cette école ?",
-		"epfc",
-	],
-	[
-		"Quelle est le jour du cours ?",
-		"mardi",
-	],
-];
+$questionsReponses = file("questionsReponses.csv",FILE_IGNORE_NEW_LINES);
+//var_dump($questionsReponses);
+
+foreach($questionsReponses as &$questionReponse) {
+	$questionReponse = explode("|",$questionReponse,2);		//var_dump($questionReponse);
+}
+unset($questionReponse);
+//var_dump($questionsReponses);die;
 
 $message = "Bienvenue dans notre quiz!";
 
@@ -50,12 +40,27 @@ if(!empty($_COOKIE['erreurLogin'])) {
 if(isset($_GET['btSend']) && $statut=='reponse') {
 	$reponseUtilisateur = trim($_GET['reponse']);
 	
-	if(!empty($reponseUtilisateur)) {
+	if(!empty($reponseUtilisateur)) {	//var_dump($questionsReponses[$nroQuestion][1]);die;
 		if($reponseUtilisateur==$questionsReponses[$nroQuestion][1]) {
 			if(sizeof($questionsReponses)!=$nroQuestion+1) {
 				$message = 'Bravo! <a href="?nroQuestion='.($nroQuestion+1).'&statut=next">Question suivante</a>';
 			} else {
 				$message = "Félicitations! Votre score est de $score points.";
+
+				//Sauvegarde du score dans un fichier
+				$data = [
+					$_SESSION['login'] ?? "Anonyme",
+					"|",
+					$score,
+					"|",
+					date('d-m-Y',time()),
+					"\n"
+				];
+
+				file_put_contents("palmares.csv",$data,FILE_APPEND);
+
+				//Réinitialiser le score
+				setcookie("score", 0, time()+(60*60*24));
 			}
 			
 			$score += 2;		//Ajouter 2 points au score

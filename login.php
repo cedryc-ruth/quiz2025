@@ -11,6 +11,7 @@ if(isset($_POST['btLogin'])) {  //var_dump('btLogin');
 
         if($login=='toto' && $password=='epfc') {   //var_dump('identifiants ok');
             $_SESSION['connected'] = true;
+            $_SESSION['login'] = $_POST['login'];
         } else {
             //Sauvegarder le message d'erreur (par cookie ou session)
             setcookie('erreurLogin','Erreur de connexion! Identifiants incorrects.',0);
@@ -28,8 +29,8 @@ if(isset($_POST['btLogin'])) {  //var_dump('btLogin');
 }
 
 //Redirection
-//echo '<a href="quizz3.php?erreurLogin=Erreur de conexion!">Retour au quiz</a>';
+//echo '<a href="quizz.php?erreurLogin=Erreur de conexion!">Retour au quiz</a>';
 
-header('Location: quizz3.php',null,302);
+header('Location: quizz.php',null,302);
 exit;
 ?>
