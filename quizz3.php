@@ -1,11 +1,5 @@
 <?php
-/*
-- 1. Créer le template de la page statique (HTML/CSS)
-- 2. Afficher la question de façon dynamique (PHP)
-- 3. Traiter la réponse envoyée par formulaire (PHP)
-	- Si elle est correcte, afficher "Bravo!"
-	- Sinon, afficher "Dommage..."
-*/
+session_start();
 
 //Déclaraiton des variables
 $questionsReponses = [
@@ -35,7 +29,6 @@ if(isset($_GET['statut']) && $_GET['statut']=='reponse') {
 	$statut = $_GET['statut'];
 }
 
-var_dump($statut);
 $nroQuestion = 0;
 //Récupération des données envoyées par URL
 if(isset($_GET['nroQuestion'])) {
@@ -46,6 +39,11 @@ $score = 0;
 //Récupération du score sauvé par cookie
 if(isset($_COOKIE['score'])) {
 	$score = $_COOKIE['score'];
+}
+
+$erreurLogin = "";
+if(!empty($_COOKIE['erreurLogin'])) {
+	$erreurLogin = $_COOKIE['erreurLogin'];
 }
 
 //Traitement des commandes
@@ -74,7 +72,6 @@ if(isset($_GET['btSend']) && $statut=='reponse') {
 		$message = "Veuillez entrer une réponse dans le formulaire.";
 	}
 }
-
 ?>
 <!doctype html>
 <html lang="fr">
@@ -83,7 +80,7 @@ if(isset($_GET['btSend']) && $statut=='reponse') {
 <title>Quiz</title>
 </head>
 <body>
-<?php if(true) { ?>
+<?php if(empty($_SESSION['connected'])) { ?>
 <form action="login.php" method="post">
 	<div>
 		<label for="login">Login:</label>
@@ -95,6 +92,7 @@ if(isset($_GET['btSend']) && $statut=='reponse') {
 	</div>
 	<button name="btLogin">Se connecter</button>
 </form>
+<p><?= $erreurLogin ?></p>
 <?php } else { ?>
 <form action="login.php" method="post">
 	<button name="btLogout">Se déconnecter</button>
