@@ -1,16 +1,29 @@
 <?php
 session_start();
 
-//Déclaraiton des variables
-$questionsReponses = file("questionsReponses.csv",FILE_IGNORE_NEW_LINES);
-//var_dump($questionsReponses);
+require('config.php');
 
-foreach($questionsReponses as &$questionReponse) {
-	$questionReponse = explode("|",$questionReponse,2);		//var_dump($questionReponse);
-}
-unset($questionReponse);
+//Accès à la source de données
+//Se connecter au serveur de DB
+$mysql = mysqli_connect(HOSTNAME,USERNAME,PASSWORD,DATABASE);
+
+//Préparer la requête
+$query = "SELECT question,reponse FROM quizz";
+
+//Envoyer la requête et récupérer le résultat
+$result = mysqli_query($mysql, $query);
+
+//Extraire les données
+$questionsReponses = mysqli_fetch_all($result, MYSQLI_NUM);
 //var_dump($questionsReponses);die;
 
+//Libérer la mémoire
+mysqli_free_result($result);
+
+//Se déconnecter
+mysqli_close($mysql);
+
+//Déclaration des variables
 $message = "Bienvenue dans notre quiz!";
 
 $statut = null;	//Variable d'état (ternaire)
@@ -36,6 +49,11 @@ if(!empty($_COOKIE['erreurLogin'])) {
 	$erreurLogin = $_COOKIE['erreurLogin'];
 }
 
+$userId = "NULL";
+if(isset($_SESSION['userId'])) {
+	$userId = $_SESSION['userId'];
+}
+
 //Traitement des commandes
 if(isset($_GET['btSend']) && $statut=='reponse') {
 	$reponseUtilisateur = trim($_GET['reponse']);
@@ -57,7 +75,30 @@ if(isset($_GET['btSend']) && $statut=='reponse') {
 					"\n"
 				];
 
-				file_put_contents("palmares.csv",$data,FILE_APPEND);
+				//Sauvegarde du score dans la source des données ----
+				//file_put_contents("palmares.csv",$data,FILE_APPEND);
+
+				//Se connecter
+				$mysql = mysqli_connect(HOSTNAME,USERNAME,PASSWORD,DATABASE);
+
+				//Préparer la requête
+				$query = "INSERT INTO `user_quiz` (`id`, `user_id`, `score`, `date`) 
+					VALUES (NULL, $userId, $score, '".date('Y-m-d H:i:s.v')."');";
+				//var_dump($query);die;
+
+				//Envoyer la requête
+				$result = mysqli_query($mysql, $query);
+
+				//Traiter le résultat
+				if($result && mysqli_affected_rows($mysql)>0) {
+					$message = "Sauvegarde du score réussie.";
+				} else {
+					$message = "Une erreur est survenue lors de la sauvegarde du score!";
+				}
+
+				//Se déconnecter
+				mysqli_close($mysql);
+				//-----
 
 				//Réinitialiser le score
 				setcookie("score", 0, time()+(60*60*24));
