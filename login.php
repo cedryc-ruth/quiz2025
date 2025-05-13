@@ -19,7 +19,7 @@ if(isset($_POST['btLogin'])) {  //var_dump('btLogin');
         //Préparer la requête
             //Nettoyer la requête
         $login = mysqli_real_escape_string($mysql, $login);
-        $query = "SELECT id, login, password FROM users WHERE login='$login'";
+        $query = "SELECT id, login, password, status FROM users WHERE login='$login'";
 
         //Envoyer la requête et récupérer le résultat
         $result = mysqli_query($mysql, $query);
@@ -41,6 +41,7 @@ if(isset($_POST['btLogin'])) {  //var_dump('btLogin');
                 $_SESSION['connected'] = true;
                 $_SESSION['login'] = $user['login'];
                 $_SESSION['userId'] = $user['id'];
+                $_SESSION['status'] = $user['status'];
             } else {
                 //Sauvegarder le message d'erreur (par cookie ou session)
                 setcookie('erreurLogin','Erreur de connexion! Identifiants incorrects.',0);

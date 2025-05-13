@@ -3,6 +3,9 @@ session_start();
 
 require('config.php');
 
+//Déclaration des variables
+$cssClass = 'alert-info';
+
 //Accès à la source de données
 //Se connecter au serveur de DB
 $mysql = mysqli_connect(HOSTNAME,USERNAME,PASSWORD,DATABASE);
@@ -54,6 +57,22 @@ if(isset($_SESSION['userId'])) {
 	$userId = $_SESSION['userId'];
 }
 
+if(isset($_GET['erreur'])) {
+	$erreurCode = $_GET['erreur'];
+
+	switch($erreurCode) {
+		case 401:
+			$message = "Vous n'avez pas le droit d'accéder à cette page!";
+			$cssClass = "alert-danger";
+			break;
+		case 404:
+			$message = "Cette ressource n'a pas été trouvée!";
+			break;
+		default:
+			$message = "Une erreur inconnue est survenue sur le serveur!";
+	}
+}
+
 //Traitement des commandes
 if(isset($_GET['btSend']) && $statut=='reponse') {
 	$reponseUtilisateur = trim($_GET['reponse']);
@@ -62,8 +81,19 @@ if(isset($_GET['btSend']) && $statut=='reponse') {
 		if($reponseUtilisateur==$questionsReponses[$nroQuestion][1]) {
 			if(sizeof($questionsReponses)!=$nroQuestion+1) {
 				$message = 'Bravo! <a href="?nroQuestion='.($nroQuestion+1).'&statut=next">Question suivante</a>';
+
+				//Mise à jour du score
+				$score += 2;		//Ajouter 2 points au score
+				$statut = 'correct';	//Changer l'état de l'application
+
+				//Sauvegarder le score dans un cookie
+				setcookie("score", $score, time()+(60*60*24));
 			} else {
 				$message = "Félicitations! Votre score est de $score points.";
+
+				//Mise à jour du score
+				$score += 2;		//Ajouter 2 points au score
+				$statut = 'terminé';	//Changer l'état de l'application
 
 				//Sauvegarde du score dans un fichier
 				$data = [
@@ -91,7 +121,8 @@ if(isset($_GET['btSend']) && $statut=='reponse') {
 
 				//Traiter le résultat
 				if($result && mysqli_affected_rows($mysql)>0) {
-					$message = "Sauvegarde du score réussie.";
+					$message = "Sauvegarde du score réussie. ";
+					$message .= '<a href="quizz.php">Recommencer le quiz.</a>';
 				} else {
 					$message = "Une erreur est survenue lors de la sauvegarde du score!";
 				}
@@ -103,17 +134,16 @@ if(isset($_GET['btSend']) && $statut=='reponse') {
 				//Réinitialiser le score
 				setcookie("score", 0, time()+(60*60*24));
 			}
-			
-			$score += 2;		//Ajouter 2 points au score
-			$statut = 'correct';	//Changer l'état de l'application
 		} else {
 			$message = "Dommage...";
-			$score--;			//Retirer 1 point au score
+
+			//Mise à jour du score
+			$score--;				//Retirer 1 point au score
 			$statut = 'incorrect';	//Changer l'état de l'application
+
+			//Sauvegarder le score dans un cookie
+			setcookie("score", $score, time()+(60*60*24));
 		}
-		
-		//Sauvegarder le score dans un cookie
-		setcookie("score", $score, time()+(60*60*24));
 	} else {
 		$message = "Veuillez entrer une réponse dans le formulaire.";
 	}
@@ -124,6 +154,23 @@ if(isset($_GET['btSend']) && $statut=='reponse') {
 <head>
 <meta charset="utf-8">
 <title>Quiz</title>
+<style>
+	.alert-info {
+		background-color: lightblue;
+		border: 1px solid darkblue;
+		border-radius: 3px;
+		padding: 3px;
+		margin: 5px;
+	}
+
+	.alert-danger {
+		background-color: pink;
+		border: 1px solid red;
+		border-radius: 3px;
+		padding: 3px;
+		margin: 5px;
+	}
+</style>
 </head>
 <body>
 <?php if(empty($_SESSION['connected'])) { ?>
@@ -143,11 +190,17 @@ if(isset($_GET['btSend']) && $statut=='reponse') {
 <form action="login.php" method="post">
 	<button name="btLogout">Se déconnecter</button>
 </form>
+
+<?php if($_SESSION['status']=='admin') { ?>
+<!-- Accès à l'administration -->
+<a href="admin/index.php">Administration</a>
+<?php } ?>
+
 <?php } ?>
 
 <h1>Quiz</h1>
-<?php if($statut!='correct') { ?>
-<p><?= $questionsReponses[$nroQuestion][0] ?></p>
+<?php if($statut!='correct' && $statut!='terminé') { ?>
+<p><?= htmlentities($questionsReponses[$nroQuestion][0]) ?></p>
 
 <form action="<?= $_SERVER['PHP_SELF'] ?>" method="get">
 	<fieldset>
@@ -163,6 +216,6 @@ if(isset($_GET['btSend']) && $statut=='reponse') {
 </form>
 <?php } ?>
 
-<div id="message"><?= $message; ?></div>
+<div id="message" class="<?= $cssClass ?>"><?= $message; ?></div>
 </body>
 </html>
