@@ -3,6 +3,8 @@ require('../config.php');
 
 session_start();
 
+$message = '';
+
 //Sécuriser l'accès
 if(empty($_SESSION['connected']) || empty($_SESSION['status']) || $_SESSION['status']!='admin') {
     //Solution1: afficher un message d'erreur
