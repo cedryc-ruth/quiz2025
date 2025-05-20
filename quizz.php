@@ -47,6 +47,12 @@ if(isset($_COOKIE['score'])) {
 	$score = $_COOKIE['score'];
 }
 
+$cptBonnesReponses = 0;
+//Récupération du nombre de bonnes réponses (sauvé par cookie)
+if(isset($_COOKIE['cptBonnesReponses'])) {
+	$cptBonnesReponses = $_COOKIE['cptBonnesReponses'];
+}
+
 $erreurLogin = "";
 if(!empty($_COOKIE['erreurLogin'])) {
 	$erreurLogin = $_COOKIE['erreurLogin'];
@@ -134,6 +140,11 @@ if(isset($_GET['btSend']) && $statut=='reponse') {
 				//Réinitialiser le score
 				setcookie("score", 0, time()+(60*60*24));
 			}
+
+			//Incrémenter le cookie des bonnes réponses
+			if($cptBonnesReponses<=$nroQuestion) {
+				setcookie('cptBonnesReponses',$cptBonnesReponses+1);
+			}
 		} else {
 			$message = "Dommage...";
 
@@ -173,6 +184,11 @@ if(isset($_GET['btSend']) && $statut=='reponse') {
 </style>
 </head>
 <body>
+
+<nav>
+    <a href="index.php">Accueil</a>
+</nav>
+
 <?php if(empty($_SESSION['connected'])) { ?>
 <form action="login.php" method="post">
 	<div>
