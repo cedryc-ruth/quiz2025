@@ -101,19 +101,22 @@ if(isset($_GET['btSend']) && $statut=='reponse') {
 				$score += 2;		//Ajouter 2 points au score
 				$statut = 'terminé';	//Changer l'état de l'application
 
-				//Sauvegarde du score dans un fichier
+			//Sauvegarde du score dans un fichier
+			/*
 				$data = [
 					$_SESSION['login'] ?? "Anonyme",
 					"|",
 					$score,
 					"|",
-					date('d-m-Y',time()),
+					date('d-m-Y G:i:s',time()),
 					"\n"
 				];
 
-				//Sauvegarde du score dans la source des données ----
+				//Sauvegarde du score dans la source des données (fichier) ----
 				//file_put_contents("palmares.csv",$data,FILE_APPEND);
+			*/
 
+			//Sauvegarde du score dans la base de données
 				//Se connecter
 				$mysql = mysqli_connect(HOSTNAME,USERNAME,PASSWORD,DATABASE);
 
@@ -135,7 +138,7 @@ if(isset($_GET['btSend']) && $statut=='reponse') {
 
 				//Se déconnecter
 				mysqli_close($mysql);
-				//-----
+			//-----
 
 				//Réinitialiser le score
 				setcookie("score", 0, time()+(60*60*24));
