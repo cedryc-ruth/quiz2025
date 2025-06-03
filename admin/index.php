@@ -82,6 +82,9 @@ if(isset($_POST["btUpload"])) {
     <ul>
         <li><a href="../quizz.php">Retour au quiz</a></li>
         <li><a href="profil.php">Profil</a></li>
+    <?php if($_SESSION['status']=='admin') { ?>
+        <li><a href="users.php">Utilisateurs</a></li>
+    <?php } ?>
     </ul>
 </nav>
 <h1>Administration</h1>
