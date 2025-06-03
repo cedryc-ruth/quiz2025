@@ -2,12 +2,14 @@
 //Reprendre la session
 session_start();
 
+$message = '';
+
 //Inclure les données de configuration (constantes de base de données)
 require('../config.php');
 
 //Sécuriser l'accès à la page
 if(!isset($_SESSION['status']) || $_SESSION['status']!='admin') {
-    header('Location: ../index.php');
+    header('Location: '.APP_URL.'/index.php');
     exit;
 }
 
